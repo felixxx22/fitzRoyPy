@@ -1,2 +1,5 @@
 /config/test.ini
 .env
+/venv/
+__pycache__/
+.log

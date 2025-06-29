@@ -1,19 +1,31 @@
-version: '3.3'
+version: '3.9'
 
 services:
-
   db:
-    container_name: pg_container
-    image: postgres
-    restart: always
+    image: postgres:17
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB}
-    volumes:
-      - pgdata:/var/lib/postgresql/data:rw
+      POSTGRES_USER: fitzroy_user
+      POSTGRES_PASSWORD: fitzroy_pass
+      POSTGRES_DB: fitzroy_db
     ports:
-      - ${DB_PORTS}
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build: .
+    depends_on:
+      - db
+    environment:
+      DB_USER: fitzroy_user
+      DB_PASSWORD: fitzroy_pass
+      DB_NAME: fitzroy_db
+      DB_HOST: db
+      DB_PORT: 5432
+      R_HOME: /usr/lib/R
+    ports:
+      - "8000:8000"  # if your app serves on this port, else remove
+    command: python main.py
 
 volumes:
   pgdata:

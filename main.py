@@ -7,7 +7,7 @@ with code_loader.get_resources() as resources:
     logger = resources.logger
 
     # Define the path to the config file and the [section] we want to get credentials from
-    config_file_path = '/some/full/path/to/fitzRoyPy/config/config_template.ini'
+    config_file_path = 'config.ini'
     section = 'credentials'
 
     # Load the config
@@ -30,7 +30,13 @@ with code_loader.get_resources() as resources:
 
     # Call any method from source.py to fetch data
     results = source.get_results(season=2020, round=1)
+    player_stats = source.get_player_stats(season=2025, round=15)
     # This will print results for season=2020, round=1
     print(results)
     # This will print the type of data 'results' returns. In this case it'll be a Pandas DataFrame
     print(type(results))
+
+    print(player_stats)
+    for col, val in player_stats.iloc[0].items():
+        print(f"{col}: {val}")
+    print(type(player_stats))
