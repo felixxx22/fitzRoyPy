@@ -59,6 +59,9 @@ CREATE TABLE IF NOT EXISTS player_stats (
     kicks NUMERIC,
     handballs NUMERIC,
     disposals NUMERIC,
+    marks NUMERIC,
+    bounces NUMERIC,
+    tackles NUMERIC,
     team_id TEXT,
     team_name TEXT,
     team_status TEXT,
@@ -96,8 +99,8 @@ INSERT_PLAYER_STATS_SQL = """
 INSERT INTO player_stats (
     player_id, match_id, season, round,
     goals, kicks, handballs, disposals,
-    team_id, team_name, team_status,
-    player_given_name, player_surname
+    marks, bounces, tackles,
+    team_id, team_status
 )
 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
 ON CONFLICT (player_id, match_id) DO UPDATE SET
@@ -105,11 +108,11 @@ ON CONFLICT (player_id, match_id) DO UPDATE SET
     kicks = EXCLUDED.kicks,
     handballs = EXCLUDED.handballs,
     disposals = EXCLUDED.disposals,
+    marks = EXCLUDED.marks,
+    bounces = EXCLUDED.bounces,
+    tackles = EXCLUDED.tackles,
     team_id = EXCLUDED.team_id,
-    team_name = EXCLUDED.team_name,
-    team_status = EXCLUDED.team_status,
-    player_given_name = EXCLUDED.player_given_name,
-    player_surname = EXCLUDED.player_surname;
+    team_status = EXCLUDED.team_status
 """
 
 # --- MAIN SCRIPT ---
@@ -152,6 +155,13 @@ with code_loader.get_resources() as resources:
 
         with database as db:
             for _, row in df.iterrows():
+                # Insert team
+                db.execute(INSERT_TEAM_SQL, (
+                    row.get('teamId'),
+                    row.get('team.name'),
+                    row.get('home.team.club.name') or row.get('away.team.club.name')
+                ))
+                
                 # Insert match
                 db.execute(INSERT_MATCH_SQL, (
                     row.get('providerId'),
@@ -163,13 +173,6 @@ with code_loader.get_resources() as resources:
                     row.get('venue.name'),
                     row.get('home.team.name'),
                     row.get('away.team.name')
-                ))
-
-                # Insert team
-                db.execute(INSERT_TEAM_SQL, (
-                    row.get('teamId'),
-                    row.get('team.name'),
-                    row.get('home.team.club.name') or row.get('away.team.club.name')
                 ))
 
                 # Insert player
@@ -191,11 +194,11 @@ with code_loader.get_resources() as resources:
                     clean_value(row.get('kicks')),
                     clean_value(row.get('handballs')),
                     clean_value(row.get('disposals')),
+                    clean_value(row.get('marks')),
+                    clean_value(row.get('bounces')),
+                    clean_value(row.get('tackles')),
                     row.get('teamId'),
-                    row.get('team.name'),
                     row.get('teamStatus'),
-                    row.get('player.givenName'),
-                    row.get('player.surname')
                 ))
 
             logger.info(f"Data for Round {round_num} loaded successfully.")
