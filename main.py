@@ -63,10 +63,7 @@ CREATE TABLE IF NOT EXISTS player_stats (
     bounces NUMERIC,
     tackles NUMERIC,
     team_id TEXT,
-    team_name TEXT,
     team_status TEXT,
-    player_given_name TEXT,
-    player_surname TEXT,
     PRIMARY KEY (player_id, match_id)
 );
 """
